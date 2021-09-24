@@ -1,0 +1,7 @@
+robot-dreams-api:
+  url: "https://robot-dreams-de-api.herokuapp.com"
+  password: "djT6LasE"
+  username: "rd_dreams"
+  process_date:
+    - '2021-03-06'
+  directory: "./data/"
