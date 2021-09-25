@@ -46,7 +46,7 @@ def app(config):
 
             else:
 
-                print('Errer code: ', response.status_code)
+                print('Error code: ', response.status_code)
 
         except HTTPError:
             print('HTTPError!')
