@@ -23,18 +23,26 @@ WORKFLOW_DEFAULT_ARGS = {
 
 POSTGRES_CONN_ID = 'test_postgres'
 
-
 #############################################################################
 # Extract / Transform
 #############################################################################
 
-def load_from_db_and_save_to_file(copy_sql, file_name):
-    pg_hook = PostgresHook.get_hook(POSTGRES_CONN_ID)
-    path = os.getcwd()
-    path = path + '/upload-data/'
-    full_file_name = path + file_name
+def load_from_db_and_save_to_file():
 
-    pg_hook.copy_expert(copy_sql, filename=full_file_name)
+    table_names_list = ['aisles', 'clients', 'departments', 'orders', 'products']
+
+    for table_name in table_names_list:
+
+        full_file_path = os.getcwd() + '/upload-data/' + table_name  + '.csv'
+        print(full_file_path)
+
+        sql = f"COPY {table_name} TO '{full_file_path}' DELIMITER ',' CSV HEADER;"
+
+        pg_conn = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID).get_conn()
+        cursor = pg_conn.cursor()
+        cursor.execute(sql)
+        pg_conn.commit()
+        pg_conn.close()
 
 
 with DAG(dag_id=DAG_ID,
@@ -43,14 +51,13 @@ with DAG(dag_id=DAG_ID,
          schedule_interval="@once",
          catchup=False
          ) as dag:
+
     start_operator = DummyOperator(task_id='Begin_execution', dag=dag,)
 
     load_from_db_and_save_to_file = PythonOperator(
         task_id="load_from_db_and_save_to_file",
         python_callable=load_from_db_and_save_to_file,
-        op_kwargs={
-            "copy_sql": "SELECT * FROM aisles",
-            "file_name": "test.csv"},
+        op_kwargs={},
         dag=dag,
         )
 
